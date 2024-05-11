@@ -1227,6 +1227,9 @@ dissector_add_range_preference(const char *name, dissector_handle_t handle, cons
 	int proto_id = proto_get_id(handle->protocol);
 	guint32 max_value = 0;
 
+        if (!pref_dissector_table)
+		return NULL;
+
 	/* If a dissector is added for Decode As only, it's dissector
 		table value would default to 0.
 		Set up a preference value with that information
@@ -2145,6 +2148,12 @@ dissector_add_for_decode_as(const char *name, dissector_handle_t handle)
 	dissector_table_t  sub_dissectors = find_dissector_table(name);
 	GSList            *entry;
 	dissector_handle_t dup_handle;
+
+        if (!handle) {
+		fprintf(stderr, "OOPS: dissector handle is null for protocol \"%s\"\n",
+		    name);
+		return;
+        }
 
 	/*
 	 * Make sure the dissector table exists.
@@ -3744,6 +3753,9 @@ have_postdissector(void)
 {
 	guint i;
 	dissector_handle_t handle;
+
+	if (!postdissectors)
+		return FALSE;
 
 	for (i = 0; i < postdissectors->len; i++) {
 		handle = POSTDISSECTORS(i).handle;

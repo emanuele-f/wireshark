@@ -529,7 +529,9 @@ decode_clear_all(void)
     g_slist_free(dissector_reset_list);
     dissector_reset_list = NULL;
 
+#if 0
     decode_dcerpc_reset_all();
+#endif
 }
 
 void

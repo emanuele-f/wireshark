@@ -1690,6 +1690,9 @@ gboolean prefs_set_range_value(pref_t *pref, range_t *value, pref_source_t sourc
 
 range_t* prefs_get_range_value_real(pref_t *pref, pref_source_t source)
 {
+    if (!pref)
+        return NULL;
+
     switch (source)
     {
     case pref_default:

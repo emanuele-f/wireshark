@@ -217,7 +217,7 @@ set(LIBWIRESHARK_NONGENERATED_FILES
 	oids.c
 	osi-utils.c
 	packet.c
-	pci-ids.c
+	#pci-ids.c
 	plugin_if.c
 	print.c
 	print_stream.c

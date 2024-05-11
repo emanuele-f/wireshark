@@ -2854,6 +2854,7 @@ dissect_rtcp_app_mccp(tvbuff_t* tvb, packet_info* pinfo, int offset, proto_tree*
             }
         }
             break;
+#if 0
         case 1:
             /* TMGI */
         {
@@ -2864,6 +2865,7 @@ dissect_rtcp_app_mccp(tvbuff_t* tvb, packet_info* pinfo, int offset, proto_tree*
             offset += mccp_fld_len;
         }
             break;
+#endif
         case 3:
             /* MCPTT Group ID */
             proto_tree_add_item(sub_tree, hf_rtcp_mcptt_group_id, tvb, offset, mccp_fld_len, ENC_UTF_8 | ENC_NA);

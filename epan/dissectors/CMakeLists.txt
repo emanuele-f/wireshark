@@ -9,7 +9,7 @@
 
 ADD_CUSTOM_CMAKE_INCLUDE()
 
-add_subdirectory(asn1 EXCLUDE_FROM_ALL)
+#add_subdirectory(asn1 EXCLUDE_FROM_ALL)
 add_subdirectory(dcerpc EXCLUDE_FROM_ALL)
 add_subdirectory(pidl EXCLUDE_FROM_ALL)
 
@@ -2070,19 +2070,66 @@ set(DISSECTOR_SUPPORT_SRC
 )
 source_group(dissector-support FILES ${DISSECTOR_SUPPORT_SRC})
 
+set(DECRYPT_DISSECTOR_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-frame.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ieee8023.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-isl.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ethertype.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-eth.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-gquic.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ip.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-tcp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-udp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-http.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-http2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-quic.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ber.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ocsp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ros.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ses.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-p1.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-idmp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dop.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-disp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dsp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-cms.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-crmf.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dap.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtse.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pres.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs1.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs12.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509if.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509ce.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509af.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509sat.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1implicit.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1explicit.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-dcerpc.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-gsm_a_gm.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-e212.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtcp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dtls.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-tls.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-tls-utils.c
+)
+
 set(DISSECTOR_FILES
-	${DISSECTOR_SRC}
-	${PIDL_DISSECTOR_SRC}
-	${ASN1_DISSECTOR_SRC}
-	${NCP2222_DISSECTOR_SRC}
-	${CUSTOM_DISSECTOR_SRC}
-	${CUSTOM_DIRTY_ASN1_DISSECTOR_SRC}
+        ${DECRYPT_DISSECTOR_FILES}
+	#${DISSECTOR_SRC}
+	#${PIDL_DISSECTOR_SRC}
+	#${ASN1_DISSECTOR_SRC}
+	#${NCP2222_DISSECTOR_SRC}
+	#${CUSTOM_DISSECTOR_SRC}
+	#${CUSTOM_DIRTY_ASN1_DISSECTOR_SRC}
 )
 source_group(dissectors FILES ${DISSECTOR_FILES})
 
 set(ALL_DISSECTOR_SRC
 	${DISSECTOR_FILES}
-	${CORBA_IDL_DISSECTOR_SRC}
+	#${CORBA_IDL_DISSECTOR_SRC}
 )
 
 #
