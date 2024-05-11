@@ -1379,7 +1379,7 @@ add_custom_target(dist
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-if(GNUTLS_FOUND)
+if(ENABLE_GNUTLS AND GNUTLS_FOUND)
 	# Calculating public keys from PKCS #11 private keys requires GnuTLS
 	# 3.4.0 or greater.
 	#
@@ -1393,6 +1393,8 @@ if(GNUTLS_FOUND)
 	set(CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
 	check_symbol_exists(gnutls_pkcs11_obj_list_import_url4 gnutls/pkcs11.h HAVE_GNUTLS_PKCS11)
 	cmake_pop_check_state()
+else()
+        unset(HAVE_GNUTLS_PKCS11 CACHE)
 endif()
 
 if (QT_FOUND)
