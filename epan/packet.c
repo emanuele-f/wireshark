@@ -1139,10 +1139,12 @@ dissector_add_uint(const char *name, const guint32 pattern, dissector_handle_t h
 		return;
 	}
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		fprintf(stderr, "Protocol being registered is \"%s\"\n",
 		    proto_get_protocol_long_name(handle->protocol));
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;
@@ -1632,10 +1634,12 @@ dissector_add_string(const char *name, const gchar *pattern,
 		return;
 	}
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		fprintf(stderr, "Protocol being registered is \"%s\"\n",
 		    proto_get_protocol_long_name(handle->protocol));
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;
@@ -1911,10 +1915,12 @@ void dissector_add_custom_table_handle(const char *name, void *pattern, dissecto
 		return;
 	}
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		fprintf(stderr, "Protocol being registered is \"%s\"\n",
 		    proto_get_protocol_long_name(handle->protocol));
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;
@@ -1967,10 +1973,12 @@ void dissector_add_guid(const char *name, guid_key* guid_val, dissector_handle_t
 		return;
 	}
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		fprintf(stderr, "Protocol being registered is \"%s\"\n",
 		    proto_get_protocol_long_name(handle->protocol));
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;
@@ -2159,10 +2167,12 @@ dissector_add_for_decode_as(const char *name, dissector_handle_t handle)
 	 * Make sure the dissector table exists.
 	 */
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		fprintf(stderr, "Protocol being registered is \"%s\"\n",
 		    proto_get_protocol_long_name(handle->protocol));
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;
@@ -2778,6 +2788,7 @@ heur_dissector_add(const char *name, heur_dissector_t dissector, const char *dis
 	 * Make sure the dissector table exists.
 	 */
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		proto_name = proto_get_protocol_name(proto);
@@ -2785,6 +2796,7 @@ heur_dissector_add(const char *name, heur_dissector_t dissector, const char *dis
 			fprintf(stderr, "Protocol being registered is \"%s\"\n",
 			    proto_name);
 		}
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;

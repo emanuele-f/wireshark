@@ -125,7 +125,9 @@ void capture_dissector_add_uint(const char *name, const guint32 pattern, capture
     /* Make sure table exists */
     sub_dissectors = (struct capture_dissector_table*)g_hash_table_lookup( capture_dissector_tables, name );
     if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
             fprintf(stderr, "OOPS: Subdissector \"%s\" not found in capture_dissector_tables\n", name);
+#endif
             if (wireshark_abort_on_dissector_bug)
                     abort();
             return;

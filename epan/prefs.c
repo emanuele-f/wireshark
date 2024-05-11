@@ -5394,6 +5394,7 @@ deprecated_port_pref(gchar *pref_name, const gchar *value)
     module_t *module;
     pref_t *pref;
 
+#ifndef USHARK_BUILD
     static gboolean sanity_checked;
     if (!sanity_checked) {
         sanity_checked = TRUE;
@@ -5413,6 +5414,7 @@ deprecated_port_pref(gchar *pref_name, const gchar *value)
             }
         }
     }
+#endif
 
     for (i = 0; i < G_N_ELEMENTS(port_prefs); i++) {
         if (strcmp(pref_name, port_prefs[i].pref_name) == 0) {
