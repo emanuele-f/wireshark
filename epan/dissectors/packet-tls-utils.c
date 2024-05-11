@@ -2190,6 +2190,10 @@ static const bytes_string ct_logids[] = {
     { NULL, 0, NULL }
 };
 
+#ifdef USHARK_BUILD
+const range_string quic_version_vals[] = {};
+#endif
+
 /*
  * Application-Layer Protocol Negotiation (ALPN) dissector tables.
  */
@@ -6913,8 +6917,10 @@ tls_dissect_certificate_authorities(ssl_common_dissect_t *hf, tvbuff_t *tvb, pac
             }
             offset += 2;
 
+#ifndef USHARK_BUILD
             dissect_x509if_DistinguishedName(FALSE, tvb, offset, &asn1_ctx,
                                              subtree, hf->hf.hs_dname);
+#endif
             offset += name_length;
         }
     }
@@ -6973,7 +6979,9 @@ ssl_dissect_hnd_ext_delegated_credentials(ssl_common_dissect_t *hf, tvbuff_t *tv
             return offset_end;
         }
         offset += 3;
+#ifndef USHARK_BUILD
         dissect_x509af_SubjectPublicKeyInfo(FALSE, tvb, offset, &asn1_ctx, tree, hf->hf.hs_cred_pubkey);
+#endif
         offset += pubkey_length;
 
         tls_dissect_signature_algorithm(hf, tvb, tree, offset);
@@ -7524,6 +7532,8 @@ ssl_dissect_hnd_hello_ext_certificate_authorities(ssl_common_dissect_t *hf, tvbu
     return tls_dissect_certificate_authorities(hf, tvb, pinfo, tree, offset, offset_end);
 }
 
+#ifndef USHARK_BUILD
+
 static gint
 ssl_dissect_hnd_hello_ext_oid_filters(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *pinfo,
                                       proto_tree *tree, guint32 offset, guint32 offset_end)
@@ -7588,6 +7598,8 @@ ssl_dissect_hnd_hello_ext_oid_filters(ssl_common_dissect_t *hf, tvbuff_t *tvb, p
 
     return offset;
 }
+
+#endif
 
 static gint
 ssl_dissect_hnd_hello_ext_server_name(ssl_common_dissect_t *hf, tvbuff_t *tvb,
@@ -7766,6 +7778,8 @@ ssl_dissect_hnd_hello_ext_compress_certificate(ssl_common_dissect_t *hf, tvbuff_
 
     return offset;
 }
+
+#ifndef USHARK_BUILD
 
 static guint32
 ssl_dissect_hnd_hello_ext_quic_transport_parameters(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *pinfo,
@@ -8134,6 +8148,8 @@ ssl_dissect_hnd_hello_ext_quic_transport_parameters(ssl_common_dissect_t *hf, tv
     return offset;
 }
 
+#endif
+
 static gint
 ssl_dissect_hnd_hello_common(ssl_common_dissect_t *hf, tvbuff_t *tvb,
                              proto_tree *tree, guint32 offset,
@@ -8323,9 +8339,11 @@ tls_dissect_ocsp_response(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *
                           guint32 offset, guint32 offset_end)
 {
     guint32     response_length;
+#ifndef USHARK_BUILD
     proto_item *ocsp_resp;
     proto_tree *ocsp_resp_tree;
     asn1_ctx_t  asn1_ctx;
+#endif
 
     /* opaque OCSPResponse<1..2^24-1>; */
     if (!ssl_add_vector(hf, tvb, pinfo, tree, offset, offset_end, &response_length,
@@ -8334,6 +8352,7 @@ tls_dissect_ocsp_response(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *
     }
     offset += 3;
 
+#ifndef USHARK_BUILD
     ocsp_resp = proto_tree_add_item(tree, proto_ocsp, tvb, offset,
                                     response_length, ENC_BIG_ENDIAN);
     proto_item_set_text(ocsp_resp, "OCSP Response");
@@ -8342,6 +8361,7 @@ tls_dissect_ocsp_response(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *
         asn1_ctx_init(&asn1_ctx, ASN1_ENC_BER, TRUE, pinfo);
         dissect_ocsp_OCSPResponse(FALSE, tvb, offset, &asn1_ctx, ocsp_resp_tree, -1);
     }
+#endif
     offset += response_length;;
 
     return offset;
@@ -9441,7 +9461,9 @@ ssl_dissect_hnd_cert(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *tree,
             }
             offset += 3;
 
+#ifndef USHARK_BUILD
             dissect_x509af_SubjectPublicKeyInfo(FALSE, tvb, offset, &asn1_ctx, subtree, hf->hf.hs_certificate);
+#endif
             offset += cert_length;
             break;
         case CERT_X509:
@@ -9452,7 +9474,9 @@ ssl_dissect_hnd_cert(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *tree,
             }
             offset += 3;
 
+#ifndef USHARK_BUILD
             dissect_x509af_Certificate(FALSE, tvb, offset, &asn1_ctx, subtree, hf->hf.hs_certificate);
+#endif
 #if defined(HAVE_LIBGNUTLS)
             if (is_from_server && ssl && certificate_index == 0) {
                 ssl_find_private_key_by_pubkey(ssl, &subjectPublicKeyInfo);
@@ -9610,8 +9634,10 @@ ssl_dissect_hnd_cert_req(ssl_common_dissect_t *hf, tvbuff_t *tvb, packet_info *p
          * TLS 1.3 draft 18 and older: certificate_authorities and
          * certificate_extensions (a vector of OID mappings).
          */
+#ifndef USHARK_BUILD
         offset = tls_dissect_certificate_authorities(hf, tvb, pinfo, tree, offset, offset_end);
         ssl_dissect_hnd_hello_ext_oid_filters(hf, tvb, pinfo, tree, offset, offset_end);
+#endif
     } else {
         /* for TLS 1.2 and older, the certificate_authorities field. */
         tls_dissect_certificate_authorities(hf, tvb, pinfo, tree, offset, offset_end);
@@ -9894,6 +9920,7 @@ ssl_dissect_hnd_extension(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *t
         case SSL_HND_HELLO_EXT_DELEGATED_CREDENTIALS:
             offset = ssl_dissect_hnd_ext_delegated_credentials(hf, tvb, ext_tree, pinfo, offset, next_offset, hnd_type);
             break;
+#ifndef USHARK_BUILD
         case SSL_HND_HELLO_EXT_USE_SRTP:
             if (is_dtls) {
                 if (hnd_type == SSL_HND_CLIENT_HELLO) {
@@ -9905,6 +9932,7 @@ ssl_dissect_hnd_extension(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *t
                 // XXX expert info: This extension MUST only be used with DTLS, and not with TLS.
             }
             break;
+#endif
         case SSL_HND_HELLO_EXT_HEARTBEAT:
             proto_tree_add_item(ext_tree, hf->hf.hs_ext_heartbeat_mode,
                                 tvb, offset, 1, ENC_BIG_ENDIAN);
@@ -9961,10 +9989,12 @@ ssl_dissect_hnd_extension(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *t
                                 tvb, offset, 2, ENC_BIG_ENDIAN);
             offset += 2;
             break;
+#ifndef USHARK_BUILD
         case SSL_HND_HELLO_EXT_QUIC_TRANSPORT_PARAMETERS:
         case SSL_HND_HELLO_EXT_QUIC_TRANSPORT_PARAMETERS_V1:
             offset = ssl_dissect_hnd_hello_ext_quic_transport_parameters(hf, tvb, pinfo, ext_tree, offset, next_offset, hnd_type, ssl);
             break;
+#endif
         case SSL_HND_HELLO_EXT_SESSION_TICKET_TLS:
             offset = ssl_dissect_hnd_hello_ext_session_ticket(hf, tvb, ext_tree, offset, next_offset, hnd_type, ssl);
             break;
@@ -10000,9 +10030,11 @@ ssl_dissect_hnd_extension(ssl_common_dissect_t *hf, tvbuff_t *tvb, proto_tree *t
         case SSL_HND_HELLO_EXT_CERTIFICATE_AUTHORITIES:
             offset = ssl_dissect_hnd_hello_ext_certificate_authorities(hf, tvb, pinfo, ext_tree, offset, next_offset);
             break;
+#ifndef USHARK_BUILD
         case SSL_HND_HELLO_EXT_OID_FILTERS:
             offset = ssl_dissect_hnd_hello_ext_oid_filters(hf, tvb, pinfo, ext_tree, offset, next_offset);
             break;
+#endif
         case SSL_HND_HELLO_EXT_POST_HANDSHAKE_AUTH:
             break;
         case SSL_HND_HELLO_EXT_NPN:

@@ -2070,54 +2070,60 @@ set(DISSECTOR_SUPPORT_SRC
 )
 source_group(dissector-support FILES ${DISSECTOR_SUPPORT_SRC})
 
-set(DECRYPT_DISSECTOR_FILES
+set(USHARK_DISSECTOR_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-frame.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ieee8023.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-isl.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-isl.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ethertype.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-eth.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-gquic.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ip.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-tcp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
-        #${CMAKE_CURRENT_SOURCE_DIR}/packet-udp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-http.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-http2.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-quic.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ber.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ocsp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ros.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-ses.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-p1.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-idmp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dop.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-disp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dsp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-cms.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-crmf.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dap.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtse.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pres.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs1.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs12.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509if.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509ce.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509af.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-x509sat.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1implicit.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1explicit.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-http.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-http2.c
         #${CMAKE_CURRENT_SOURCE_DIR}/packet-dcerpc.c
         #${CMAKE_CURRENT_SOURCE_DIR}/packet-gsm_a_gm.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-e212.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtcp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-rtp.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/packet-dtls.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-tls.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-tls-utils.c
+
+        # quic
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-gquic.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-udp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-quic.c
+
+        # dtls
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-e212.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-rtcp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-rtp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-dtls.c
+
+        # x509
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-ber.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-ocsp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-ros.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-ses.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-p1.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-idmp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-dop.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-disp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-dsp.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-cms.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-crmf.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-dap.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-rtse.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-pres.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs1.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-pkcs12.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-x509if.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-x509ce.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-x509af.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-x509sat.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1implicit.c
+        #${CMAKE_CURRENT_SOURCE_DIR}/packet-pkix1explicit.c
 )
 
 set(DISSECTOR_FILES
-        ${DECRYPT_DISSECTOR_FILES}
+        ${USHARK_DISSECTOR_FILES}
 	#${DISSECTOR_SRC}
 	#${PIDL_DISSECTOR_SRC}
 	#${ASN1_DISSECTOR_SRC}
@@ -2190,7 +2196,7 @@ add_library(dissectors OBJECT
 
 
 	${DISSECTOR_FILES}
-	${DISSECTOR_SUPPORT_SRC}
+	#${DISSECTOR_SUPPORT_SRC}
 )
 
 target_include_directories(dissectors
@@ -2213,7 +2219,7 @@ target_include_directories(dissectors
 
 set_target_properties(dissectors PROPERTIES
 	FOLDER "Libs/epan/dissectors"
-	COMPILE_DEFINITIONS "WS_BUILD_DLL"
+	COMPILE_DEFINITIONS "WS_BUILD_DLL -DUSHARK_BUILD"
 )
 
 install(FILES ${DISSECTOR_PUBLIC_HEADERS}

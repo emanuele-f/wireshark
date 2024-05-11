@@ -484,7 +484,9 @@ dissect_eth_common(tvbuff_t *tvb, packet_info *pinfo, proto_tree *parent_tree,
       tvb_get_guint8(tvb, 2) == 0x0C &&
       tvb_get_guint8(tvb, 3) == 0x00 &&
       tvb_get_guint8(tvb, 4) == 0x00) {
+#ifndef USHARK_BUILD
       dissect_isl(tvb, pinfo, parent_tree, fcs_len);
+#endif
       return fh_tree;
     }
   }

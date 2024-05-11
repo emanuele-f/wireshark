@@ -216,7 +216,9 @@ proto_reg_handoff_data(void)
 {
 	dissector_add_string("media_type", "application/octet-stream", data_handle);
 	ssl_dissector_add(0, data_handle);
+#ifndef USHARK_BUILD
 	dtls_dissector_add(0, data_handle);
+#endif
 
 	dissector_all_tables_foreach_table(add_foreach_decode_as, (gpointer)data_handle, NULL);
 }
