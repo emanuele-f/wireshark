@@ -73,8 +73,11 @@
 #ifdef _WIN32
 # define socklen_t unsigned int
 #endif
+
+#ifdef HAVE_CARES
 #include <ares.h>
 #include <ares_version.h>
+#endif
 
 #include <glib.h>
 
@@ -343,11 +346,15 @@ typedef struct _sync_dns_data
     gboolean        *completed;
 } sync_dns_data_t;
 
+#ifdef HAS_CARES
 static ares_channel ghba_chan; /* ares_gethostbyaddr -- Usually non-interactive, no timeout */
 static ares_channel ghbn_chan; /* ares_gethostbyname -- Usually interactive, timeout */
+#endif
 
 static  gboolean  async_dns_initialized = FALSE;
+#ifdef HAS_CARES
 static  guint       async_dns_in_flight = 0;
+#endif
 static  wmem_list_t *async_dns_queue_head = NULL;
 
 //UAT for providing a list of DNS servers to C-ARES for name resolution
@@ -420,6 +427,8 @@ dnsserver_uat_fld_port_chk_cb(void* r _U_, const char* p, guint len _U_, const v
     *err = NULL;
     return TRUE;
 }
+
+#ifdef HAVE_CARES
 
 static void
 c_ares_ghba_sync_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
@@ -555,6 +564,8 @@ sync_lookup_ip6(const ws_in6_addr *addr)
     wait_for_sync_resolv(&completed);
 }
 
+#endif
+
 void
 set_resolution_synchrony(gboolean synchronous)
 {
@@ -565,6 +576,7 @@ set_resolution_synchrony(gboolean synchronous)
 static void
 c_ares_set_dns_servers(void)
 {
+#ifdef HAVE_CARES
     if ((!async_dns_initialized) || (!use_custom_dns_server_list))
         return;
 
@@ -622,6 +634,7 @@ c_ares_set_dns_servers(void)
         ares_set_servers_ports(ghbn_chan, servers);
         wmem_free(NULL, servers);
     }
+#endif
 }
 
 typedef struct {
@@ -1056,6 +1069,8 @@ fill_dummy_ip6(hashipv6_t* volatile tp)
     (void) g_strlcpy(tp->name, tp->ip6, MAXNAMELEN);
 }
 
+#ifdef HAS_CARES
+
 static void
 c_ares_ghba_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
     async_dns_queue_msg_t *caqm = (async_dns_queue_msg_t *)arg;
@@ -1083,7 +1098,10 @@ c_ares_ghba_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
     wmem_free(wmem_epan_scope(), caqm);
 }
 
+#endif
+
 /* --------------- */
+
 static hashipv4_t *
 new_ipv4(const guint addr)
 {
@@ -1121,6 +1139,7 @@ host_lookup(const guint addr)
     if (!gbl_resolv_flags.network_name)
         return tp;
 
+#ifdef HAVE_CARES
     if (gbl_resolv_flags.use_external_net_name_resolver) {
         tp->flags |= TRIED_RESOLVE_ADDRESS;
 
@@ -1148,6 +1167,7 @@ host_lookup(const guint addr)
             }
         }
     }
+#endif
 
     return tp;
 
@@ -1196,6 +1216,7 @@ host_lookup6(const ws_in6_addr *addr)
     if (!gbl_resolv_flags.network_name)
         return tp;
 
+#ifdef HAVE_CARES
     if (gbl_resolv_flags.use_external_net_name_resolver) {
         tp->flags |= TRIED_RESOLVE_ADDRESS;
 
@@ -1223,6 +1244,7 @@ host_lookup6(const ws_in6_addr *addr)
             }
         }
     }
+#endif
 
     return tp;
 
@@ -2949,6 +2971,7 @@ disable_name_resolution(void) {
 
 gboolean
 host_name_lookup_process(void) {
+#ifdef HAS_CARES
     async_dns_queue_msg_t *caqm;
     struct timeval tv = { 0, 0 };
     int nfds;
@@ -2996,18 +3019,24 @@ host_name_lookup_process(void) {
 
     /* Any new entries? */
     return nro;
+#else
+    return FALSE;
+#endif
 }
 
 static void
 _host_name_lookup_cleanup(void) {
     async_dns_queue_head = NULL;
 
+#ifdef HAS_CARES
     if (async_dns_initialized) {
         ares_destroy(ghba_chan);
         ares_destroy(ghbn_chan);
     }
+
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     ares_library_cleanup();
+#endif
 #endif
     async_dns_initialized = FALSE;
 }
@@ -3170,6 +3199,7 @@ host_name_lookup_init(void)
         report_open_failure(hostspath, errno, FALSE);
     }
     g_free(hostspath);
+#ifdef HAS_CARES
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     if (ares_library_init(ARES_LIB_INIT_ALL) == ARES_SUCCESS) {
 #endif
@@ -3179,6 +3209,7 @@ host_name_lookup_init(void)
         }
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     }
+#endif
 #endif
 
     if (extra_hosts_files && !gbl_resolv_flags.load_hosts_file_from_profile_only) {
@@ -3363,6 +3394,7 @@ get_ether_name_if_known(const guint8 *addr)
     }
 }
 
+#ifdef HAVE_CARES
 void
 add_ether_byip(const guint ip, const guint8 *eth)
 {
@@ -3386,6 +3418,7 @@ add_ether_byip(const guint ip, const guint8 *eth)
     }
 
 } /* add_ether_byip */
+#endif
 
 gchar *
 get_ipxnet_name(wmem_allocator_t *allocator, const guint32 addr)
@@ -3500,6 +3533,8 @@ eui64_to_display(wmem_allocator_t *allocator, const guint64 addr_eui64)
     return ret;
 } /* eui64_to_display */
 
+#ifdef HAS_CARES
+
 #define GHI_TIMEOUT (250 * 1000)
 static void
 c_ares_ghi_cb(void *arg, int status, int timeouts _U_, struct hostent *hp) {
@@ -3514,16 +3549,20 @@ c_ares_ghi_cb(void *arg, int status, int timeouts _U_, struct hostent *hp) {
     }
 }
 
+#endif
+
 /* Translate a string, assumed either to be a dotted-quad IPv4 address or
  * a host name, to a numeric IPv4 address.  Return TRUE if we succeed and
  * set "*addrp" to that numeric IPv4 address; return FALSE if we fail. */
 gboolean
 get_host_ipaddr(const char *host, guint32 *addrp)
 {
+#if HAS_CARES
     struct timeval tv = { 0, GHI_TIMEOUT }, *tvp;
     int nfds;
     fd_set rfds, wfds;
     async_hostent_t ahe;
+#endif
 
     /*
      * XXX - are there places where this is used to translate something
@@ -3544,6 +3583,7 @@ get_host_ipaddr(const char *host, guint32 *addrp)
             return FALSE;
         }
 
+#if HAS_CARES
         if (!async_dns_initialized || name_resolve_concurrency < 1) {
             return FALSE;
         }
@@ -3568,6 +3608,7 @@ get_host_ipaddr(const char *host, guint32 *addrp)
         if (ahe.addr_size == ahe.copied) {
             return TRUE;
         }
+#endif
         return FALSE;
     }
 
@@ -3582,10 +3623,12 @@ get_host_ipaddr(const char *host, guint32 *addrp)
 gboolean
 get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
 {
+#if HAS_CARES
     struct timeval tv = { 0, GHI_TIMEOUT }, *tvp;
     int nfds;
     fd_set rfds, wfds;
     async_hostent_t ahe;
+#endif
 
     if (str_to_ip6(host, addrp))
         return TRUE;
@@ -3606,6 +3649,7 @@ get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
         return FALSE;
     }
 
+#if HAS_CARES
     /* try FQDN */
     if (!async_dns_initialized || name_resolve_concurrency < 1) {
         return FALSE;
@@ -3631,7 +3675,7 @@ get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
     if (ahe.addr_size == ahe.copied) {
         return TRUE;
     }
-
+#endif
     return FALSE;
 }
 

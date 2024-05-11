@@ -76,7 +76,9 @@
 #include <smi.h>
 #endif
 
+#ifdef HAVE_CARES
 #include <ares.h>
+#endif
 
 #ifdef HAVE_LZ4
 #include <lz4.h>
@@ -872,8 +874,10 @@ epan_gather_compile_info(feature_list l)
 void
 epan_gather_runtime_info(feature_list l)
 {
+#ifdef HAVE_CARES
 	/* c-ares */
 	with_feature(l, "c-ares %s", ares_version(NULL));
+#endif
 
 	/* GnuTLS */
 #ifdef HAVE_LIBGNUTLS
