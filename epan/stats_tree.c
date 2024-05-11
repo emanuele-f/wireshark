@@ -1486,7 +1486,8 @@ WS_DLL_PUBLIC void stats_tree_format_node_as_str(const stat_node *node,
 
 void stats_tree_cleanup(void)
 {
-    g_hash_table_destroy(registry);
+    if (registry)
+        g_hash_table_destroy(registry);
 }
 
 /*
