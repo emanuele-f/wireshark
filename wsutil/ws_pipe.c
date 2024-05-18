@@ -108,10 +108,12 @@ close_non_standard_fds_linux(gpointer user_data _U_)
 
         close(dir_fd);
     } else {
+#ifndef __ANDROID__
         /* Slow fallback in case /proc is not mounted */
         for (int fd = STDERR_FILENO + 1; fd < getdtablesize(); fd++) {
             fcntl(fd, F_SETFD, FD_CLOEXEC);
         }
+#endif
     }
 }
 #endif

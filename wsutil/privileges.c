@@ -245,6 +245,7 @@ relinquish_special_privs_perm(void)
  */
 gchar *
 get_cur_username(void) {
+#ifndef __ANDROID__
 	gchar *username;
 	struct passwd *pw = getpwuid(getuid());
 
@@ -255,6 +256,9 @@ get_cur_username(void) {
 	}
 	endpwent();
 	return username;
+#else
+        return g_strdup("UNKNOWN");
+#endif
 }
 
 /*
@@ -262,6 +266,7 @@ get_cur_username(void) {
  */
 gchar *
 get_cur_groupname(void) {
+#ifndef __ANDROID__
 	gchar *groupname;
 	struct group *gr = getgrgid(getgid());
 
@@ -272,6 +277,9 @@ get_cur_groupname(void) {
 	}
 	endgrent();
 	return groupname;
+#else
+        return g_strdup("UNKNOWN");
+#endif
 }
 
 #endif /* _WIN32 */
