@@ -1,4 +1,13 @@
 #
+
+SET(LEMON_DEP "")
+
+if( NOT LEMON_BIN )
+   SET(LEMON_BIN $<TARGET_FILE:lemon>)
+else()
+   SET(LEMON_DEP lemon)
+endif()
+
 MACRO(ADD_LEMON_FILES _source _generated)
     set(_lemonpardir ${CMAKE_SOURCE_DIR}/tools/lemon)
     FOREACH (_current_FILE ${ARGN})
@@ -13,13 +22,13 @@ MACRO(ADD_LEMON_FILES _source _generated)
           # These files are generated as side-effect
           ${_out}.h
           ${_out}.out
-         COMMAND $<TARGET_FILE:lemon>
+         COMMAND "${LEMON_BIN}"
            -T${_lemonpardir}/lempar.c
            -d.
            ${_in}
          DEPENDS
            ${_in}
-           lemon
+           ${LEMON_DEP}
            ${_lemonpardir}/lempar.c
       )
 
