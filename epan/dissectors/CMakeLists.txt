@@ -2077,6 +2077,7 @@ set(USHARK_DISSECTOR_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ethertype.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-eth.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-raw.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ip.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ipv6.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-tcp.c
