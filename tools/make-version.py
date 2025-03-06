@@ -324,6 +324,11 @@ def read_git_repo(src_dir, tagged_version_extra, untagged_version_extra):
     git_last_annotated = subprocess.check_output(git_last_annotated_cmd, universal_newlines=True).strip()
     parts = git_last_annotated.split('-')
     git_description = git_last_annotated
+    if (len(parts) > 1):
+        for i in range(len(parts)):
+            if "ushark" in parts[i]:
+                parts.pop(i)
+                break
     if len(parts) > 1:
         num_commits = int(parts[1])
     else:
