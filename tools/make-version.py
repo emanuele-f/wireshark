@@ -372,6 +372,11 @@ def read_git_repo(src_dir, tagged_version_extra, untagged_version_extra):
     git_describe_cmd = shlex.split(f'git --git-dir="{GIT_DIR}" describe --abbrev={GIT_ABBREV_LENGTH} --long --always --match "v[1-9]*"')
     ws_git_description = subprocess.check_output(git_describe_cmd, universal_newlines=True).strip()
     parts = ws_git_description.split('-')
+    if (len(parts) > 1):
+        for i in range(len(parts)):
+            if "ushark" in parts[i]:
+                parts.pop(i)
+                break
     if len(parts) > 1:
         ws_num_commits = int(parts[1])
     else:
