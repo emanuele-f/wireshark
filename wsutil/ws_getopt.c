@@ -38,6 +38,10 @@
 
 #include <ws_codepoints.h>
 
+#ifdef __ANDROID__
+int mblen(const char* __s, size_t __n);
+#endif
+
 char *ws_optarg;
 int ws_optind=1, ws_opterr=1, ws_optopt, ws_optpos, ws_optreset=0;
 
