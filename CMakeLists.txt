@@ -1499,16 +1499,22 @@ reset_find_package(GCRYPT GCRYPT_ERROR_LIBRARY)
 find_package(GCRYPT "1.8.0" REQUIRED)
 # C Asynchronous resolver
 reset_find_package(CARES)
-find_package(CARES "1.13.0" REQUIRED)
-if (CARES_VERSION VERSION_GREATER_EQUAL "1.28.0")
-	# Suppress deprecation warnings.
-	add_compile_definitions(CARES_NO_DEPRECATED)
-endif ()
+find_package(CARES "1.13.0")
+if(CARES_FOUND)
+	set(HAVE_C_ARES 1)
+	if (CARES_VERSION VERSION_GREATER_EQUAL "1.28.0")
+		# Suppress deprecation warnings.
+		add_compile_definitions(CARES_NO_DEPRECATED)
+	endif ()
+endif()
 find_package(LEX REQUIRED)
 reset_find_package(PCRE2 PCRE2_DEBUG_LIBRARY)
 find_package(PCRE2 REQUIRED)
 reset_find_package(LibXml2)
-find_package(LibXml2 "2.9.7" REQUIRED)
+find_package(LibXml2 "2.9.7")
+if(LIBXML2_FOUND)
+	set(HAVE_LIBXML2 1)
+endif()
 
 if (NOT WIN32)
 	find_package(Gettext)
@@ -1683,7 +1689,7 @@ add_custom_target(dist
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-if(GNUTLS_FOUND)
+if(ENABLE_GNUTLS AND GNUTLS_FOUND)
 	# Calculating public keys from PKCS #11 private keys requires GnuTLS
 	# 3.4.0 or greater.
 	#
@@ -1699,6 +1705,8 @@ if(GNUTLS_FOUND)
 		check_symbol_exists(gnutls_pkcs11_obj_list_import_url4 gnutls/pkcs11.h HAVE_GNUTLS_PKCS11)
 		cmake_pop_check_state()
 	endif (ENABLE_PKCS11)
+else()
+        unset(HAVE_GNUTLS_PKCS11 CACHE)
 endif()
 
 if (QT_FOUND)

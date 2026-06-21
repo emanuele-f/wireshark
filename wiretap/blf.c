@@ -38,9 +38,11 @@
 #include <wsutil/zlib_compat.h>
 #include <wsutil/pint.h>
 #include <wsutil/ws_assert.h>
+#ifdef HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#endif
 #include "file_wrappers.h"
 #include "wtap_module.h"
 
@@ -3034,6 +3036,7 @@ blf_read_linsleepmodeevent(blf_params_t* params, int* err, char** err_info, int6
     return true;
 }
 
+#ifdef HAVE_LIBXML2
 static bool
 blf_parse_xml_port(const xmlChar* str, char** name, uint16_t* hwchannel, bool* simulated) {
     static const char name_magic[] = "name=";
@@ -3246,6 +3249,7 @@ blf_set_xml_channels(blf_params_t* params, const char* text, size_t len) {
     xmlFreeDoc(doc);
     return true;
 }
+#endif /* HAVE_LIBXML2 */
 
 static int
 blf_read_apptextmessage(blf_params_t *params, int *err, char **err_info, int64_t block_start, int64_t data_start, int64_t object_length, uint32_t flags, uint64_t object_timestamp, blf_metadata_info_t* metadata_info) {
@@ -3375,9 +3379,11 @@ blf_read_apptextmessage(blf_params_t *params, int *err, char **err_info, int64_t
             return BLF_APPTEXT_CONT;
         }
 
+#ifdef HAVE_LIBXML2
         if (((apptextheader.reservedAppText1 >> 24) & 0xff) == BLF_APPTEXT_XML_CHANNELS) {
             blf_set_xml_channels(params, (const char*)(params->rec->data.data + metadata_info->payload_start), params->rec->data.first_free - metadata_info->payload_start);
         }
+#endif
 
         /* Override the timestamp with 0 for metadata objects. Thay can only occur at the beginning of the file, and they usually already have a timestamp of 0. */
         blf_init_rec(params, 0, 0, WTAP_ENCAP_WIRESHARK_UPPER_PDU, 0, UINT16_MAX, (uint32_t)ws_buffer_length(&params->rec->data), (uint32_t)ws_buffer_length(&params->rec->data));

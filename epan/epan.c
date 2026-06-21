@@ -82,7 +82,9 @@
 #include <smi.h>
 #endif
 
+#ifdef HAVE_C_ARES
 #include <ares.h>
+#endif
 
 #ifdef HAVE_LZ4
 #include <lz4.h>
@@ -104,8 +106,10 @@
 #include <brotli/decode.h>
 #endif
 
+#ifdef HAVE_LIBXML2
 #include <libxml/xmlversion.h>
 #include <libxml/parser.h>
+#endif
 
 #ifndef _WIN32
 #include <signal.h>
@@ -363,8 +367,10 @@ epan_init(register_cb cb, void *client_data, bool load_plugins, epan_app_data_t*
 #endif
 #endif
 
+#ifdef HAVE_LIBXML2
 	xmlInitParser();
 	LIBXML_TEST_VERSION;
+#endif
 
 #ifndef _WIN32
 	// We might receive a SIGPIPE due to maxmind_db.
@@ -506,7 +512,9 @@ epan_cleanup(void)
 	gnutls_global_deinit();
 #endif
 
+#ifdef HAVE_LIBXML2
 	xmlCleanupParser();
+#endif
 
 	except_deinit();
 	addr_resolv_cleanup();
@@ -1008,7 +1016,9 @@ epan_gather_compile_info(feature_list l)
 #endif /* HAVE_SNAPPY */
 
 	/* libxml2 */
+#ifdef HAVE_LIBXML2
 	with_feature(l, "libxml2 %s", LIBXML_DOTTED_VERSION);
+#endif
 
 	/* libsmi */
 #ifdef HAVE_LIBSMI
@@ -1029,7 +1039,9 @@ epan_gather_runtime_info(feature_list l)
 	gather_pcre2_runtime_info(l);
 
 	/* c-ares */
+#ifdef HAVE_C_ARES
 	with_feature(l, "c-ares %s", ares_version(NULL));
+#endif
 
 	/* GnuTLS */
 #ifdef HAVE_LIBGNUTLS

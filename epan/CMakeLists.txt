@@ -298,7 +298,7 @@ target_link_libraries(epan
 		${GLIB2_LIBRARIES}
 	PRIVATE
 		wiretap
-		LibXml2::LibXml2
+		$<$<BOOL:${LIBXML2_FOUND}>:LibXml2::LibXml2>
 		${BROTLI_LIBRARIES}
 		${CARES_LIBRARIES}
 		${GCRYPT_LIBRARIES}

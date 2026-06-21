@@ -200,7 +200,7 @@ target_link_libraries(wiretap
 		wsutil
 		${GLIB2_LIBRARIES}
 	PRIVATE
-		LibXml2::LibXml2
+		$<$<BOOL:${LIBXML2_FOUND}>:LibXml2::LibXml2>
 		${ZLIB_LIBRARIES}
 		${ZLIBNG_LIBRARIES}
 		${ZSTD_LIBRARIES}

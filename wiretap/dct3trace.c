@@ -22,9 +22,11 @@
 #include <errno.h>
 
 #include <wsutil/strtoi.h>
+#ifdef HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#endif
 
 /*
    Example downlink data:
@@ -133,6 +135,7 @@ hex2bin(uint8_t *out, uint8_t *out_end, char *in)
 	return (int)(out - out_start);
 }
 
+#ifdef HAVE_LIBXML2
 static bool
 xml_get_int(const char* name, xmlChar* str, int* val, int* err, char** err_info)
 {
@@ -354,6 +357,15 @@ end:
 	xmlFreeDoc(doc);
 	return status;
 }
+#else /* HAVE_LIBXML2 */
+static bool
+dct3trace_get_packet(wtap* wth _U_, wtap_rec* rec _U_, const char* text _U_, size_t len _U_, int* err, char** err_info)
+{
+	*err = WTAP_ERR_UNSUPPORTED;
+	*err_info = g_strdup("dct3trace: support requires libxml2, which was not compiled in");
+	return false;
+}
+#endif /* HAVE_LIBXML2 */
 
 /* Read from fh and store into buffer, until buffer contains needle.
  * Returns location of needle once found, or NULL if it's never found

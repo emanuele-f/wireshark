@@ -27,9 +27,11 @@
 #include <wsutil/filesystem.h>
 #include <wsutil/strtoi.h>
 #include <wsutil/pint.h>
+#ifdef HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#endif
 #include "file_wrappers.h"
 #include "wtap_module.h"
 
@@ -2289,6 +2291,7 @@ static ttl_result_t ttl_read_entry(wtap* wth, wtap_rec* rec, int* err, char** er
 
 }
 
+#ifdef HAVE_LIBXML2
 static bool
 ttl_xml_node_get_number(xmlNodePtr node, xmlXPathContextPtr ctx, double *ret) {
     xmlXPathObjectPtr result;
@@ -2408,6 +2411,13 @@ ttl_process_xml_config(ttl_t* ttl, const char* text, int size) {
     xmlFreeDoc(doc);
     return true;
 }
+#else /* HAVE_LIBXML2 */
+/* The TTL logger configuration is XML; without libxml2 it can't be parsed. */
+static bool
+ttl_process_xml_config(ttl_t* ttl _U_, const char* text _U_, int size _U_) {
+    return false;
+}
+#endif /* HAVE_LIBXML2 */
 
 /* Maximum supported line length of preference files */
 #define MAX_LINELEN     1024

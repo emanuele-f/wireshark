@@ -115,6 +115,12 @@
 /* Define to use kerberos */
 #cmakedefine HAVE_KERBEROS 1
 
+/* Define to use c-ares */
+#cmakedefine HAVE_C_ARES 1
+
+/* Define to use libxml2 */
+#cmakedefine HAVE_LIBXML2 1
+
 /* Define to use nghttp2 */
 #cmakedefine HAVE_NGHTTP2 1
 

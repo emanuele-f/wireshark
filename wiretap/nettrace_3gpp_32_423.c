@@ -33,9 +33,11 @@
 #include "wsutil/str_util.h"
 #include <wsutil/inet_addr.h>
 #include <wsutil/ws_assert.h>
+#ifdef HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#endif
 #include <glib.h>
 
 /* String constants sought in the XML data.
@@ -112,6 +114,7 @@ void register_nettrace_3gpp_32_423(void);
 /* Parse a string IPv4 or IPv6 address into bytes for exported_pdu_info.
  * Also parses the port pairs and transport layer type.
  */
+#ifdef HAVE_LIBXML2
 static void
 nettrace_parse_address(char* curr_pos, bool is_src_addr, exported_pdu_info_t *exported_pdu_info)
 {
@@ -895,6 +898,14 @@ nettrace_3gpp_32_423_file_open(wtap *wth, int *err _U_, char **err_info _U_)
 
 	return WTAP_OPEN_MINE;
 }
+#else /* HAVE_LIBXML2 */
+/* 3GPP TS 32.423 trace files are XML-based; without libxml2 they can't be parsed. */
+wtap_open_return_val
+nettrace_3gpp_32_423_file_open(wtap *wth _U_, int *err _U_, char **err_info _U_)
+{
+	return WTAP_OPEN_NOT_MINE;
+}
+#endif /* HAVE_LIBXML2 */
 
 static const struct supported_block_type nettrace_3gpp_32_423_blocks_supported[] = {
 	/*

@@ -30,9 +30,11 @@
 #include <wsutil/strtoi.h>
 #include <wsutil/pint.h>
 #include <wsutil/str_util.h>
+#ifdef HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#endif
 
 void register_peektagged(void);
 
@@ -175,6 +177,7 @@ typedef struct {
 
 static int peektagged_file_type_subtype = -1;
 
+#ifdef HAVE_LIBXML2
 static uint32_t
 peektagged_get_file_version(xmlDocPtr doc)
 {
@@ -979,6 +982,13 @@ wtap_open_return_val peektagged_open(wtap* wth, int* err, char** err_info)
 
     return WTAP_OPEN_MINE;
 }
+#else /* HAVE_LIBXML2 */
+/* Savvius tagged files are XML-based; without libxml2 they can't be parsed. */
+wtap_open_return_val peektagged_open(wtap* wth _U_, int* err _U_, char** err_info _U_)
+{
+    return WTAP_OPEN_NOT_MINE;
+}
+#endif /* HAVE_LIBXML2 */
 
 static const struct supported_block_type peektagged_blocks_supported[] = {
     /*

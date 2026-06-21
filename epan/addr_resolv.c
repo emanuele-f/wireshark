@@ -76,8 +76,10 @@
 #ifdef _WIN32
 # define socklen_t unsigned int
 #endif
+#ifdef HAVE_C_ARES
 #include <ares.h>
 #include <ares_version.h>
+#endif
 
 #include <glib.h>
 
@@ -393,8 +395,10 @@ typedef struct _async_hostent {
     void *addrp;
 } async_hostent_t;
 
+#ifdef HAVE_C_ARES
 static void
 c_ares_ghba_cb(void *arg, int status, int timeouts _U_, struct hostent *he);
+#endif
 
 /*
  * Submitted synchronous queries trigger a callback (c_ares_ghba_sync_cb()).
@@ -411,8 +415,10 @@ typedef struct _sync_dns_data
     bool            *completed;
 } sync_dns_data_t;
 
+#ifdef HAVE_C_ARES
 static ares_channel ghba_chan; /* ares_gethostbyaddr -- Usually non-interactive, no timeout */
 static ares_channel ghbn_chan; /* ares_gethostbyname -- Usually interactive, timeout */
+#endif
 
 static  bool        async_dns_initialized;
 static  unsigned    async_dns_in_flight;
@@ -490,6 +496,7 @@ dnsserver_uat_fld_port_chk_cb(void* r _U_, const char* p, unsigned len _U_, cons
     return true;
 }
 
+#ifdef HAVE_C_ARES
 static void
 c_ares_ghba_sync_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
     sync_dns_data_t *sdd = (sync_dns_data_t *)arg;
@@ -601,20 +608,22 @@ process_async_dns_queue(void)
 
     g_mutex_unlock(&async_dns_queue_mtx);
 }
+#endif /* HAVE_C_ARES */
 
 static void
 wait_for_async_queue(void)
 {
-    struct timeval tv = { 0, 0 };
-    int nfds;
-    fd_set rfds, wfds;
-
     new_resolved_objects = false;
 
     if (!async_dns_initialized) {
         maxmind_db_lookup_process();
         return;
     }
+
+#ifdef HAVE_C_ARES
+    struct timeval tv = { 0, 0 };
+    int nfds;
+    fd_set rfds, wfds;
 
     while (1) {
         /* We're switching to synchronous lookups, so process anything in
@@ -646,11 +655,13 @@ wait_for_async_queue(void)
         }
         ares_process(ghba_chan, &rfds, &wfds);
     }
+#endif /* HAVE_C_ARES */
 
     maxmind_db_lookup_process();
     return;
 }
 
+#ifdef HAVE_C_ARES
 static void
 sync_lookup_ip4(const uint32_t addr)
 {
@@ -708,6 +719,7 @@ sync_lookup_ip6(const ws_in6_addr *addrp)
      */
     wait_for_sync_resolv(&completed);
 }
+#endif /* HAVE_C_ARES */
 
 void
 set_resolution_synchrony(bool synchronous)
@@ -720,6 +732,7 @@ set_resolution_synchrony(bool synchronous)
     }
 }
 
+#ifdef HAVE_C_ARES
 static void
 c_ares_set_dns_servers(void)
 {
@@ -781,6 +794,12 @@ c_ares_set_dns_servers(void)
         wmem_free(NULL, servers);
     }
 }
+#else /* HAVE_C_ARES */
+static void
+c_ares_set_dns_servers(void)
+{
+}
+#endif /* HAVE_C_ARES */
 
 typedef struct {
     uint32_t     mask;
@@ -1325,6 +1344,7 @@ fill_dummy_ip6(hashipv6_t* volatile tp)
     }
 }
 
+#ifdef HAVE_C_ARES
 static void
 c_ares_ghba_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
     async_dns_queue_msg_t *caqm = (async_dns_queue_msg_t *)arg;
@@ -1351,6 +1371,7 @@ c_ares_ghba_cb(void *arg, int status, int timeouts _U_, struct hostent *he) {
     }
     wmem_free(addr_resolv_scope, caqm);
 }
+#endif /* HAVE_C_ARES */
 
 /* --------------- */
 hashipv4_t *
@@ -1393,6 +1414,7 @@ host_lookup(const unsigned addr)
     if (gbl_resolv_flags.use_external_net_name_resolver) {
         tp->flags |= TRIED_RESOLVE_ADDRESS;
 
+#ifdef HAVE_C_ARES
         if (async_dns_initialized) {
             /* c-ares is initialized, so we can use it */
             if (resolve_synchronously || name_resolve_concurrency == 0) {
@@ -1416,6 +1438,7 @@ host_lookup(const unsigned addr)
                 wmem_list_append(async_dns_queue_head, (void *) caqm);
             }
         }
+#endif /* HAVE_C_ARES */
     }
 
     return tp;
@@ -1468,6 +1491,7 @@ host_lookup6(const ws_in6_addr *addr)
     if (gbl_resolv_flags.use_external_net_name_resolver) {
         tp->flags |= TRIED_RESOLVE_ADDRESS;
 
+#ifdef HAVE_C_ARES
         if (async_dns_initialized) {
             /* c-ares is initialized, so we can use it */
             if (resolve_synchronously || name_resolve_concurrency == 0) {
@@ -1491,6 +1515,7 @@ host_lookup6(const ws_in6_addr *addr)
                 wmem_list_append(async_dns_queue_head, (void *) caqm);
             }
         }
+#endif /* HAVE_C_ARES */
     }
 
     return tp;
@@ -3803,9 +3828,6 @@ disable_name_resolution(void) {
 
 bool
 host_name_lookup_process(void) {
-    struct timeval tv = { 0, 0 };
-    int nfds;
-    fd_set rfds, wfds;
     bool nro = new_resolved_objects;
 
     new_resolved_objects = false;
@@ -3814,6 +3836,11 @@ host_name_lookup_process(void) {
     if (!async_dns_initialized)
         /* c-ares not initialized. Bail out and cancel timers. */
         return nro;
+
+#ifdef HAVE_C_ARES
+    struct timeval tv = { 0, 0 };
+    int nfds;
+    fd_set rfds, wfds;
 
     process_async_dns_queue();
 
@@ -3829,6 +3856,7 @@ host_name_lookup_process(void) {
         }
         ares_process(ghba_chan, &rfds, &wfds);
     }
+#endif /* HAVE_C_ARES */
 
     /* Any new entries? */
     return nro;
@@ -3838,6 +3866,7 @@ static void
 _host_name_lookup_cleanup(void) {
     async_dns_queue_head = NULL;
 
+#ifdef HAVE_C_ARES
     if (async_dns_initialized) {
         ares_destroy(ghba_chan);
         ares_destroy(ghbn_chan);
@@ -3845,6 +3874,7 @@ _host_name_lookup_cleanup(void) {
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     ares_library_cleanup();
 #endif
+#endif /* HAVE_C_ARES */
     async_dns_initialized = false;
 }
 
@@ -4050,6 +4080,7 @@ host_name_lookup_init(const char* app_env_var_prefix)
         report_open_failure(hostspath, errno, false);
     }
     g_free(hostspath);
+#ifdef HAVE_C_ARES
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     if (ares_library_init(ARES_LIB_INIT_ALL) == ARES_SUCCESS) {
 #endif
@@ -4061,6 +4092,7 @@ host_name_lookup_init(const char* app_env_var_prefix)
 #ifdef CARES_HAVE_ARES_LIBRARY_INIT
     }
 #endif
+#endif /* HAVE_C_ARES */
 
     if (extra_hosts_files) {
         for (i = 0; i < extra_hosts_files->len; i++) {
@@ -4403,6 +4435,7 @@ eui64_to_display(wmem_allocator_t *allocator, const uint64_t addr_eui64)
 } /* eui64_to_display */
 
 #define GHI_TIMEOUT (250 * 1000)
+#ifdef HAVE_C_ARES
 static void
 c_ares_ghi_cb(void *arg, int status, int timeouts _U_, struct hostent *hp) {
     /*
@@ -4417,6 +4450,7 @@ c_ares_ghi_cb(void *arg, int status, int timeouts _U_, struct hostent *hp) {
         ahp->copied = hp->h_length;
     }
 }
+#endif /* HAVE_C_ARES */
 
 /* Translate a string, assumed either to be a dotted-quad IPv4 address or
  * a host name, to a numeric IPv4 address.  Return true if we succeed and
@@ -4424,10 +4458,12 @@ c_ares_ghi_cb(void *arg, int status, int timeouts _U_, struct hostent *hp) {
 bool
 get_host_ipaddr(const char *host, uint32_t *addrp)
 {
+#ifdef HAVE_C_ARES
     struct timeval tv = { 0, GHI_TIMEOUT }, *tvp;
     int nfds;
     fd_set rfds, wfds;
     async_hostent_t ahe;
+#endif /* HAVE_C_ARES */
 
     /*
      * XXX - are there places where this is used to translate something
@@ -4451,6 +4487,7 @@ get_host_ipaddr(const char *host, uint32_t *addrp)
             return false;
         }
 
+#ifdef HAVE_C_ARES
         if (!async_dns_initialized || name_resolve_concurrency < 1) {
             return false;
         }
@@ -4476,6 +4513,9 @@ get_host_ipaddr(const char *host, uint32_t *addrp)
             return true;
         }
         return false;
+#else /* HAVE_C_ARES */
+        return false;
+#endif /* HAVE_C_ARES */
     }
 
     return true;
@@ -4489,10 +4529,12 @@ get_host_ipaddr(const char *host, uint32_t *addrp)
 bool
 get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
 {
+#ifdef HAVE_C_ARES
     struct timeval tv = { 0, GHI_TIMEOUT }, *tvp;
     int nfds;
     fd_set rfds, wfds;
     async_hostent_t ahe;
+#endif /* HAVE_C_ARES */
 
     if (str_to_ip6(host, addrp))
         return true;
@@ -4517,6 +4559,7 @@ get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
     }
 
     /* try FQDN */
+#ifdef HAVE_C_ARES
     if (!async_dns_initialized || name_resolve_concurrency < 1) {
         return false;
     }
@@ -4543,6 +4586,9 @@ get_host_ipaddr6(const char *host, ws_in6_addr *addrp)
     }
 
     return false;
+#else /* HAVE_C_ARES */
+    return false;
+#endif /* HAVE_C_ARES */
 }
 
 wmem_map_t *
