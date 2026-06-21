@@ -2965,6 +2965,7 @@ heur_dissector_add(const char *name, heur_dissector_t dissector, const char *dis
 	 * Make sure the dissector table exists.
 	 */
 	if (sub_dissectors == NULL) {
+#ifndef USHARK_BUILD
 		fprintf(stderr, "OOPS: dissector table \"%s\" doesn't exist\n",
 		    name);
 		proto_name = proto_get_protocol_name(proto);
@@ -2972,6 +2973,7 @@ heur_dissector_add(const char *name, heur_dissector_t dissector, const char *dis
 			fprintf(stderr, "Protocol being registered is \"%s\"\n",
 			    proto_name);
 		}
+#endif
 		if (wireshark_abort_on_dissector_bug)
 			abort();
 		return;

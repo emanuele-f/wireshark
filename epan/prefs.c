@@ -1777,6 +1777,9 @@ bool prefs_set_range_value(pref_t *pref, range_t *value, pref_source_t source)
 
 range_t* prefs_get_range_value_real(pref_t *pref, pref_source_t source)
 {
+    if (!pref)
+        return NULL;
+
     switch (source)
     {
     case pref_default:
@@ -5751,6 +5754,7 @@ deprecated_port_pref(char *pref_name, const char *value)
     module_t *module;
     pref_t *pref;
 
+#ifndef USHARK_BUILD
     static bool sanity_checked;
     if (!sanity_checked) {
         sanity_checked = true;
@@ -5771,6 +5775,7 @@ deprecated_port_pref(char *pref_name, const char *value)
             }
         }
     }
+#endif
 
     for (i = 0; i < G_N_ELEMENTS(port_prefs); i++) {
         if (strcmp(pref_name, port_prefs[i].pref_name) == 0) {
