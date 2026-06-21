@@ -2881,6 +2881,7 @@ try_init_stream_with_fake_headers(tvbuff_t* tvb, packet_info* pinfo, http2_sessi
     }
 }
 
+#ifndef USHARK_BUILD
 static void
 dissect_http2_add_assoc_imsi_to_tracked_3gpp_session(tvbuff_t *tvb, proto_tree *http2_tree, http2_stream_info_t *stream_info) {
     /* Add Associate IMSI */
@@ -2895,6 +2896,7 @@ dissect_http2_add_assoc_imsi_to_tracked_3gpp_session(tvbuff_t *tvb, proto_tree *
         }
     }
 }
+#endif
 #endif
 
 static char*
@@ -4288,7 +4290,9 @@ dissect_http2_push_promise(tvbuff_t *tvb, packet_info *pinfo _U_, http2_session_
     }
 
     /* Add Associate IMSI */
+#ifndef USHARK_BUILD
     dissect_http2_add_assoc_imsi_to_tracked_3gpp_session(tvb, http2_tree, stream_info);
+#endif
 #endif
 
     offset += headlen;
@@ -4664,7 +4668,9 @@ dissect_http2_pdu(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void* dat
     http2_stream_info_t *stream_info = get_stream_info_for_id(pinfo, http2_session, false, streamid);
 
     /* Add Associate IMSI */
+#ifndef USHARK_BUILD
     dissect_http2_add_assoc_imsi_to_tracked_3gpp_session(tvb, http2_tree, stream_info);
+#endif
 #endif
 
     tap_queue_packet(http2_tap, pinfo, http2_stats);

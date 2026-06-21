@@ -4029,7 +4029,9 @@ dissect_ssl2_hnd_server_hello(tvbuff_t *tvb,
     /* now the variable length fields */
     if (certificate_length > 0)
     {
+#ifndef USHARK_BUILD
         (void)dissect_x509af_Certificate(false, tvb, offset, &asn1_ctx, tree, dissect_ssl3_hf.hf.hs_certificate);
+#endif
         offset += certificate_length;
     }
 
@@ -5218,6 +5220,7 @@ proto_register_tls(void)
     secrets_register_inject_type("TLS", ssl_session_key_count, tls_export_dsb, ssl_export_sessions);
 }
 
+#ifndef USHARK_BUILD
 static int dissect_tls_sct_ber(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, void *data _U_)
 {
     uint32_t offset = 0;
@@ -5230,6 +5233,7 @@ static int dissect_tls_sct_ber(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tr
      */
     return tls_dissect_sct_list(&dissect_ssl3_hf, tvb, pinfo, tree, offset, tvb_captured_length(tvb), TLSV1DOT2_VERSION);
 }
+#endif /* !USHARK_BUILD */
 
 /* If this dissector uses sub-dissector registration add a registration
  * routine.  This format is required because a script is used to find
@@ -5269,9 +5273,11 @@ proto_reg_handoff_ssl(void)
 
     exported_pdu_tap = find_tap_id(EXPORT_PDU_TAP_NAME_LAYER_7);
 
+#ifndef USHARK_BUILD
     /* Certificate Transparency extensions: 2 (Certificate), 5 (OCSP Response) */
     register_ber_oid_dissector("1.3.6.1.4.1.11129.2.4.2", dissect_tls_sct_ber, proto_tls, "SignedCertificateTimestampList");
     register_ber_oid_dissector("1.3.6.1.4.1.11129.2.4.5", dissect_tls_sct_ber, proto_tls, "SignedCertificateTimestampList");
+#endif
 
     heur_dissector_add("tcp", dissect_ssl_heur, "SSL/TLS over TCP", "tls_tcp", proto_tls, HEURISTIC_ENABLE);
     dissector_add_string("http.upgrade", "tls", tls_handle);

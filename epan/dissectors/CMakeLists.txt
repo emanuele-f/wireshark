@@ -1946,14 +1946,8 @@ set(EVENT_FILES
 
 set(EVENT_DISSECTOR_SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/file-file.c
-	${CMAKE_CURRENT_SOURCE_DIR}/file-pcapng.c
 	${CMAKE_CURRENT_SOURCE_DIR}/packet-frame.c
 	${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
-	${CMAKE_CURRENT_SOURCE_DIR}/packet-json.c
-	${CMAKE_CURRENT_SOURCE_DIR}/packet-media-type.c
-	${CMAKE_CURRENT_SOURCE_DIR}/packet-pcapng_block.c
-	${CMAKE_CURRENT_SOURCE_DIR}/packet-text-media.c
-	${EVENT_FILES}
 )
 
 set(DISSECTOR_SUPPORT_SRC
@@ -1965,7 +1959,9 @@ set(DISSECTOR_SUPPORT_SRC
 source_group(dissector-support FILES ${DISSECTOR_SUPPORT_SRC})
 
 set(USHARK_DISSECTOR_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/file-file.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-frame.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/packet-media-type.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ieee8023.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-data.c
         ${CMAKE_CURRENT_SOURCE_DIR}/packet-ethertype.c
@@ -2145,7 +2141,7 @@ target_include_directories(dissectors
 
 set_target_properties(dissectors PROPERTIES
 	FOLDER "Libs/epan/dissectors"
-	COMPILE_DEFINITIONS "WS_BUILD_DLL -DUSHARK_BUILD"
+	COMPILE_DEFINITIONS "WS_BUILD_DLL;USHARK_BUILD"
 )
 
 install(FILES ${DISSECTOR_PUBLIC_HEADERS}

@@ -231,7 +231,9 @@ proto_reg_handoff_data(void)
 {
 	common_reg_handoff_data();
 	ssl_dissector_add(0, data_handle);
+#ifndef USHARK_BUILD
 	dtls_dissector_add(0, data_handle);
+#endif
 }
 
 void
