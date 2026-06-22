@@ -30,86 +30,102 @@ set(WIRETAP_PUBLIC_HEADERS
 # routines, we *require* them to have registration routines named
 # register_pcap() and register_pcapng(), and directly call those routines.
 #
+# USHARK_BUILD: ushark never opens a file -- it hand-builds its own wtap struct
+# and feeds packets from memory (see ushark_wtap_open/ushark_read), so it never
+# invokes any registered file-format reader. All the readers below are therefore
+# dead code in this build. We keep only the few that the always-compiled core
+# still references at link time:
+#   - pcap-common.c          : wtap_pcap_encap_to_wtap_encap() (used by ushark,
+#                              libpcap.c and pcapng.c)
+#   - atm.c                  : atm_guess_traffic_type() called by pcap-common.c
+#   - erf.c                  : erf_priv_*/erf_populate_interface_from_header()
+#                              called by libpcap.c (via erf-common.h)
+#   - pcapng-darwin-custom.c : pcapng_write/compute legacy-darwin helpers called
+#                              by pcapng.c
+# register_pcapng()/register_pcap() are called directly in file_access.c, so
+# pcapng.c and libpcap.c (listed in WIRETAP_NONGENERATED_C_FILES) stay compiled.
+# The commented-out readers are kept verbatim for clean merges on upgrades.
 set(WIRETAP_C_MODULE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/5views.c
-	${CMAKE_CURRENT_SOURCE_DIR}/aethra.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ascendtext.c
 	${CMAKE_CURRENT_SOURCE_DIR}/atm.c
-	${CMAKE_CURRENT_SOURCE_DIR}/autosar_dlt.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ber.c
-	${CMAKE_CURRENT_SOURCE_DIR}/blf.c
-	${CMAKE_CURRENT_SOURCE_DIR}/btsnoop.c
-	${CMAKE_CURRENT_SOURCE_DIR}/busmaster.c
-	${CMAKE_CURRENT_SOURCE_DIR}/camins.c
-	${CMAKE_CURRENT_SOURCE_DIR}/candump.c
-	${CMAKE_CURRENT_SOURCE_DIR}/capsa.c
-	${CMAKE_CURRENT_SOURCE_DIR}/catapult_dct2000.c
-	${CMAKE_CURRENT_SOURCE_DIR}/cllog.c
-	${CMAKE_CURRENT_SOURCE_DIR}/commview.c
-	${CMAKE_CURRENT_SOURCE_DIR}/cosine.c
-	${CMAKE_CURRENT_SOURCE_DIR}/csids.c
-	${CMAKE_CURRENT_SOURCE_DIR}/daintree-sna.c
-	${CMAKE_CURRENT_SOURCE_DIR}/dbs-etherwatch.c
-	${CMAKE_CURRENT_SOURCE_DIR}/dpa400.c
-	${CMAKE_CURRENT_SOURCE_DIR}/dct3trace.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ems.c
 	${CMAKE_CURRENT_SOURCE_DIR}/erf.c
-	${CMAKE_CURRENT_SOURCE_DIR}/eri_enb_log.c
-	${CMAKE_CURRENT_SOURCE_DIR}/eyesdn.c
-	${CMAKE_CURRENT_SOURCE_DIR}/hcidump.c
-	${CMAKE_CURRENT_SOURCE_DIR}/i4btrace.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ipfix.c
-	${CMAKE_CURRENT_SOURCE_DIR}/iptrace.c
-	${CMAKE_CURRENT_SOURCE_DIR}/iseries.c
-	${CMAKE_CURRENT_SOURCE_DIR}/json.c
-	${CMAKE_CURRENT_SOURCE_DIR}/json_log.c
-	${CMAKE_CURRENT_SOURCE_DIR}/k12.c
-	${CMAKE_CURRENT_SOURCE_DIR}/lanalyzer.c
-	${CMAKE_CURRENT_SOURCE_DIR}/log3gpp.c
-	${CMAKE_CURRENT_SOURCE_DIR}/logcat.c
-	${CMAKE_CURRENT_SOURCE_DIR}/logcat_text.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mmodule.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mp4.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mpeg.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mplog.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mime_file.c
-	${CMAKE_CURRENT_SOURCE_DIR}/mp2t.c
-	${CMAKE_CURRENT_SOURCE_DIR}/netlog.c
-	${CMAKE_CURRENT_SOURCE_DIR}/netmon.c
-	${CMAKE_CURRENT_SOURCE_DIR}/netscaler.c
-	${CMAKE_CURRENT_SOURCE_DIR}/netscreen.c
-	${CMAKE_CURRENT_SOURCE_DIR}/nettl.c
-	${CMAKE_CURRENT_SOURCE_DIR}/nettrace_3gpp_32_423.c
-	${CMAKE_CURRENT_SOURCE_DIR}/netxray.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ngsniffer.c
-	${CMAKE_CURRENT_SOURCE_DIR}/observer.c
-	${CMAKE_CURRENT_SOURCE_DIR}/packetlogger.c
 	${CMAKE_CURRENT_SOURCE_DIR}/pcap-common.c
 	${CMAKE_CURRENT_SOURCE_DIR}/pcapng-darwin-custom.c
-	${CMAKE_CURRENT_SOURCE_DIR}/pcapng-netflix-custom.c
-	${CMAKE_CURRENT_SOURCE_DIR}/pcapng-sysdig.c
-	${CMAKE_CURRENT_SOURCE_DIR}/peak-trc.c
-	${CMAKE_CURRENT_SOURCE_DIR}/peekclassic.c
-	${CMAKE_CURRENT_SOURCE_DIR}/peektagged.c
-	${CMAKE_CURRENT_SOURCE_DIR}/pppdump.c
-	${CMAKE_CURRENT_SOURCE_DIR}/procmon.c
-	${CMAKE_CURRENT_SOURCE_DIR}/radcom.c
-	${CMAKE_CURRENT_SOURCE_DIR}/rfc7468.c
-	${CMAKE_CURRENT_SOURCE_DIR}/rtpdump.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ruby_marshal.c
-	${CMAKE_CURRENT_SOURCE_DIR}/snoop.c
-	${CMAKE_CURRENT_SOURCE_DIR}/stanag4607.c
-	${CMAKE_CURRENT_SOURCE_DIR}/systemd_journal.c
-	${CMAKE_CURRENT_SOURCE_DIR}/tnef.c
-	${CMAKE_CURRENT_SOURCE_DIR}/toshiba.c
-	${CMAKE_CURRENT_SOURCE_DIR}/ttl.c
-	${CMAKE_CURRENT_SOURCE_DIR}/visual.c
-	${CMAKE_CURRENT_SOURCE_DIR}/vms.c
-	${CMAKE_CURRENT_SOURCE_DIR}/vwr.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/5views.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/aethra.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ascendtext.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/autosar_dlt.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ber.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/blf.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/btsnoop.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/busmaster.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/camins.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/candump.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/capsa.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/catapult_dct2000.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/cllog.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/commview.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/cosine.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/csids.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/daintree-sna.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/dbs-etherwatch.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/dpa400.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/dct3trace.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ems.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/eri_enb_log.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/eyesdn.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/hcidump.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/i4btrace.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ipfix.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/iptrace.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/iseries.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/json.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/json_log.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/k12.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/lanalyzer.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/log3gpp.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/logcat.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/logcat_text.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mmodule.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mp4.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mpeg.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mplog.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mime_file.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/mp2t.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/netlog.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/netmon.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/netscaler.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/netscreen.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/nettl.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/nettrace_3gpp_32_423.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/netxray.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ngsniffer.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/observer.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/packetlogger.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/pcapng-netflix-custom.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/pcapng-sysdig.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/peak-trc.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/peekclassic.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/peektagged.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/pppdump.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/procmon.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/radcom.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/rfc7468.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/rtpdump.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ruby_marshal.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/snoop.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/stanag4607.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/systemd_journal.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/tnef.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/toshiba.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/ttl.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/visual.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/vms.c
+#	${CMAKE_CURRENT_SOURCE_DIR}/vwr.c
 )
 
+# USHARK_BUILD: k12text reader removed (k12text.l), see above.
 set(WIRETAP_LEX_MODULE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/k12text.l
+#	${CMAKE_CURRENT_SOURCE_DIR}/k12text.l
 )
 
 #
@@ -142,15 +158,17 @@ set(WIRETAP_NONGENERATED_C_FILES
 #
 set(WIRETAP_FILES ${WIRETAP_NONGENERATED_C_FILES} wtap_modules.c)
 
+# USHARK_BUILD: ascend (ascendtext.c) and busmaster (busmaster.c) readers are
+# removed above, so their flex/lemon parsers are no longer built.
 add_lex_files(LEX_FILES WIRETAP_FILES
 	${WIRETAP_LEX_MODULE_FILES}
-	${CMAKE_CURRENT_SOURCE_DIR}/ascend_scanner.l
-	${CMAKE_CURRENT_SOURCE_DIR}/busmaster_scanner.l
+#	${CMAKE_CURRENT_SOURCE_DIR}/ascend_scanner.l
+#	${CMAKE_CURRENT_SOURCE_DIR}/busmaster_scanner.l
 )
 
 add_lemon_files(LEMON_FILES WIRETAP_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/ascend_parser.lemon
-	${CMAKE_CURRENT_SOURCE_DIR}/busmaster_parser.lemon
+#	${CMAKE_CURRENT_SOURCE_DIR}/ascend_parser.lemon
+#	${CMAKE_CURRENT_SOURCE_DIR}/busmaster_parser.lemon
 )
 
 #
@@ -185,7 +203,7 @@ add_library(wiretap
 
 set_target_properties(wiretap PROPERTIES
 	PREFIX "lib"
-	COMPILE_DEFINITIONS "WS_BUILD_DLL"
+	COMPILE_DEFINITIONS "WS_BUILD_DLL;USHARK_BUILD"
 	LINK_FLAGS "${WS_LINK_FLAGS}"
 	VERSION "0.0.1" SOVERSION 0
 	FOLDER "DLLs"

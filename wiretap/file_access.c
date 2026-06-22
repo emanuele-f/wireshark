@@ -275,6 +275,22 @@ wtap_get_file_extension_type_extensions(unsigned extension_type)
  * packaging/wix/ComponentGroups.wxi (for Windows).
  */
 static const struct open_info open_info_base[] = {
+#ifdef USHARK_BUILD
+	/*
+	 * USHARK_BUILD: ushark never opens a file (it feeds packets from memory
+	 * via its own wtap reader), so no open routine is ever called. The vast
+	 * majority of file-format readers are dropped from the build (see
+	 * wiretap/CMakeLists.txt), so they must also be removed from this static
+	 * table or it would reference undefined *_open symbols. We keep pcapng and
+	 * libpcap (their register_*() are still called from
+	 * wtap_init_file_type_subtypes) plus one heuristic entry (erf) so that
+	 * set_heuristic_routine() finds a HEURISTIC entry after the MAGIC ones and
+	 * its ws_assert(heuristic_open_routine_idx > 0) holds.
+	 */
+	{ "Wireshark/tcpdump/... - pcap",           OPEN_INFO_MAGIC,     libpcap_open,             NULL,   NULL, NULL },
+	{ "Wireshark/... - pcapng",                 OPEN_INFO_MAGIC,     pcapng_open,              NULL, NULL, NULL },
+	{ "Endace ERF capture",                     OPEN_INFO_HEURISTIC, erf_open,                 "erf",      NULL, NULL },
+#else
 	/* Open routines that look for magic numbers */
 	{ "Wireshark/tcpdump/... - pcap",           OPEN_INFO_MAGIC,     libpcap_open,             NULL,   NULL, NULL },
 	{ "Wireshark/... - pcapng",                 OPEN_INFO_MAGIC,     pcapng_open,              NULL, NULL, NULL },
@@ -379,6 +395,7 @@ static const struct open_info open_info_base[] = {
 	/* Extremely weak heuristics - put them at the end. */
 	{ "Ixia IxVeriWave .vwr Raw Capture",       OPEN_INFO_HEURISTIC, vwr_open,                 "vwr",      NULL, NULL },
 	{ "CAM Inspector file",                     OPEN_INFO_HEURISTIC, camins_open,              "camins",   NULL, NULL },
+#endif /* USHARK_BUILD */
 };
 
 /* this is only used to build the dynamic array on load, do NOT use this
