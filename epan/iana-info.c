@@ -407,6 +407,7 @@ static const struct ws_iana_ip_special_block __ipv6_special_block[] = {
 /* (last updated 2026-06-05) */
 
 
+#ifndef USHARK_BUILD
 static const value_string enterprise_val[] = {
 	{ 0,        "Reserved" },
 	{ 1,        "NxNetworks" },
@@ -66272,10 +66273,17 @@ static const value_string enterprise_val[] = {
 	{ 65976,    "VerAvanti, Inc" },
 	{ 0, NULL }
 };
+#else
+/* USHARK: the IANA Private Enterprise Numbers database (~3 MB) is stripped to
+ * shrink libushark.so. Lookups via enterprises_lookup() fall back to the caller
+ * supplied "Unknown" string, which is fine for TLS/HTTP2 payload extraction. */
+static const value_string enterprise_val[] = { { 0, NULL } };
+#endif
 
 value_string_ext enterprise_val_ext = VALUE_STRING_EXT_INIT(enterprise_val);
 
 
+#ifndef USHARK_BUILD
 static const ws_services_entry_t global_tcp_udp_services_table[] = {
 	{ 1,        "tcpmux",           "TCP Port Service Multiplexer"},
 	{ 5,        "rje",              "Remote Job Entry"},
@@ -84283,6 +84291,16 @@ static const ws_services_entry_t global_dccp_services_table[] = {
 	{ 5005,     "avt-profile-2",    "RTP control protocol"},
 	{ 6514,     "syslog-tls",       "syslog over DTLS"},
 };
+#else
+/* USHARK: the IANA service-name (port) database is stripped to shrink
+ * libushark.so. global_services_lookup() misses cleanly (port->name resolution
+ * is unused by TLS/HTTP2 payload extraction). */
+static const ws_services_entry_t global_tcp_udp_services_table[] = { { 0, "", "" } };
+static const ws_services_entry_t global_tcp_services_table[]     = { { 0, "", "" } };
+static const ws_services_entry_t global_udp_services_table[]     = { { 0, "", "" } };
+static const ws_services_entry_t global_sctp_services_table[]    = { { 0, "", "" } };
+static const ws_services_entry_t global_dccp_services_table[]    = { { 0, "", "" } };
+#endif
 
 static const uint16_t _services_max_port = 49150;
 /* <END GENERATED SOURCE> */

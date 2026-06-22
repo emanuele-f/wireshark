@@ -41,7 +41,18 @@ typedef struct {
     const char *long_name;
 } manuf_oui36_t;
 
+#ifndef USHARK_BUILD
 #include "manuf-data.c"
+#else
+/* USHARK: the OUI/MAC vendor-name database (~2.5 MB) is stripped to shrink
+ * libushark.so. ushark only does TLS/HTTP2 payload extraction and never needs
+ * MAC vendor names. Keep minimal 1-element tables so the lookup functions still
+ * link and miss cleanly, and the iterators don't read past the array. */
+static const manuf_registry_t ieee_registry_table[]     = { { {0,0,0},      MA_L } };
+static const manuf_oui24_t    global_manuf_oui24_table[] = { { {0,0,0},      "", "" } };
+static const manuf_oui28_t    global_manuf_oui28_table[] = { { {0,0,0,0},    "", "" } };
+static const manuf_oui36_t    global_manuf_oui36_table[] = { { {0,0,0,0,0},  "", "" } };
+#endif
 
 static int
 compare_oui24_registry(const void *key, const void *element)
