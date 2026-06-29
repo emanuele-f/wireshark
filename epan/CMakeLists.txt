@@ -189,7 +189,6 @@ set(LIBWIRESHARK_NONGENERATED_FILES
 	maxmind_db.c
 	media_params.c
 	next_tvb.c
-	nghttp2_hd_huffman_data.c
 	oids.c
 	osi-utils.c
 	packet.c
@@ -225,7 +224,6 @@ set(LIBWIRESHARK_NONGENERATED_FILES
 	tvbuff_brotli.c
 	tvbuff_snappy.c
 	tvbuff_composite.c
-	tvbuff_hpackhuff.c
 	tvbuff_real.c
 	tvbuff_subset.c
 	tvbuff_zlib.c
