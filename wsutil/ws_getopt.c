@@ -38,8 +38,17 @@
 
 #include <ws_codepoints.h>
 
-#ifdef __ANDROID__
-int mblen(const char* __s, size_t __n);
+#if defined(__ANDROID__) && __ANDROID_API__ < 26
+/*
+ * Android's bionic only provides mblen() from API level 26
+ * (__INTRODUCED_IN(26) in <stdlib.h>), but this library targets API 21, so the
+ * symbol is missing from libc.so at link time. Provide a shim based on
+ * mbtowc(), which is available since API 21. mblen(s, n) is equivalent to
+ * mbtowc((wchar_t *)0, s, n).
+ */
+static int mblen(const char *__s, size_t __n) {
+	return mbtowc(NULL, __s, __n);
+}
 #endif
 
 char *ws_optarg;
